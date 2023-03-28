@@ -249,11 +249,13 @@ public class BattleHandler : MonoBehaviour
 
     IEnumerator DoAttack()
     {
-        int attackerAttack = selectedCharacter.GetComponent<Character>().GetAttack();
-        int attackerDamage = selectedCharacter.GetComponent<Character>().GetDamage();
-        int attackerDC = selectedCharacter.GetComponent<Character>().GetDC();
-        int targetAC = currentTarget.GetComponent<Character>().GetAC();
-        int targetSave = currentTarget.GetComponent<Character>().GetSave();
+        Character currentCharacter = selectedCharacter.GetComponent<Character>();
+
+        int attackerAttack = currentCharacter.GetAttack();
+        int attackerDamage = currentCharacter.GetDamage();
+        int attackerDC = currentCharacter.GetDC();
+        int targetAC = currentCharacter.GetAC();
+        int targetSave = currentCharacter.GetSave();
         int roll = Random.Range(1, 20);
 
         //attack Animation
@@ -304,7 +306,7 @@ public class BattleHandler : MonoBehaviour
         yield return new WaitForSeconds(1.0f);
 
         //back to idle
-        selectedCharacter.GetComponent<Character>().SetState(Character.State.idle);
+        currentCharacter.SetState(Character.State.idle);
 
         if (selectedCharacter.tag.Equals("Enemy"))
         {
