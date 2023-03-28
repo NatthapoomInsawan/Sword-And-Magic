@@ -306,7 +306,10 @@ public class BattleHandler : MonoBehaviour
         yield return new WaitForSeconds(1.0f);
 
         //back to idle
-        currentCharacter.SetState(Character.State.idle);
+        if (currentCharacter.GetState() == Character.State.dead)
+            currentCharacter.SetState(Character.State.dead);
+        else
+            currentCharacter.SetState(Character.State.idle);
 
         if (selectedCharacter.tag.Equals("Enemy"))
         {
