@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 
 public class BattleHandler : MonoBehaviour
 {
@@ -12,29 +13,29 @@ public class BattleHandler : MonoBehaviour
     }
 
     [Header("Player")]
-    public GameObject player1;
-    public GameObject player2;
-    public GameObject player3;
-    public GameObject player4;
+    public Character player1;
+    public Character player2;
+    public Character player3;
+    public Character player4;
     [Header("Enemy")]
-    public GameObject enemy1;
-    public GameObject enemy2;
-    public GameObject enemy3;
-    public GameObject enemy4;
+    public Character enemy1;
+    public Character enemy2;
+    public Character enemy3;
+    public Character enemy4;
     [Header("Damage Text")]
     public GameObject damageText;
 
     [Header("UI Handler")]
-    public GameObject UIhandler;
+    public UIHandler UIhandler;
 
-    readonly private List<GameObject> characterList = new();
-    private GameObject selectedCharacter;
-    private GameObject currentTarget;
+    readonly private List<Character> characterList = new();
+    private Character selectedCharacter;
+    private Character currentTarget;
 
     private BattleState battleState;
 
-    readonly private GameObject[] playerLane = new GameObject[4];
-    readonly private GameObject[] enemyLane = new GameObject[4];
+    readonly private Character[] playerLane = new Character[4];
+    readonly private Character[] enemyLane = new Character[4];
 
     readonly private Item[] inventory = new Item[4];
 
@@ -96,15 +97,15 @@ public class BattleHandler : MonoBehaviour
                 UIhandler.transform.GetChild(8).gameObject.SetActive(true);
                 break;
             case BattleState.ingame:
-                if (enemy1.GetComponent<Character>().GetState() == Character.State.dead &&
-                    enemy2.GetComponent<Character>().GetState() == Character.State.dead &&
-                    enemy3.GetComponent<Character>().GetState() == Character.State.dead &&
-                    enemy4.GetComponent<Character>().GetState() == Character.State.dead)
+                if (enemy1.GetState() == Character.State.dead &&
+                    enemy2.GetState() == Character.State.dead &&
+                    enemy3.GetState() == Character.State.dead &&
+                    enemy4.GetState() == Character.State.dead)
                     battleState = BattleState.won;
-                else if (player1.GetComponent<Character>().GetState() == Character.State.dead &&
-                    player2.GetComponent<Character>().GetState() == Character.State.dead &&
-                    player3.GetComponent<Character>().GetState() == Character.State.dead &&
-                    player4.GetComponent<Character>().GetState() == Character.State.dead)
+                else if (player1.GetState() == Character.State.dead &&
+                    player2.GetState() == Character.State.dead &&
+                    player3.GetState() == Character.State.dead &&
+                    player4.GetState() == Character.State.dead)
                     battleState = BattleState.lose;
                 break;
         }
@@ -116,22 +117,22 @@ public class BattleHandler : MonoBehaviour
     }
 
 
-    public GameObject GetSelectedCharacter()
+    public Character GetSelectedCharacter()
     {
         return selectedCharacter;
     }
 
-    public void SetCurrentTarget(GameObject target)
+    public void SetCurrentTarget(Character target)
     {
         currentTarget = target;
     }
 
-    public GameObject[] GetPlayerLane()
+    public Character[] GetPlayerLane()
     {
         return playerLane;
     }
 
-    public GameObject[] GetEnemyLane()
+    public Character[] GetEnemyLane()
     {
         return enemyLane;
     }
@@ -144,7 +145,7 @@ public class BattleHandler : MonoBehaviour
     private void UpdateSelection()
     {
 
-        foreach (GameObject character in characterList)
+        foreach (Character character in characterList)
         {
             if (character == null)
             {
@@ -189,7 +190,7 @@ public class BattleHandler : MonoBehaviour
         }
         else //Player Turn
         {
-            UIhandler.GetComponent<UIHandler>().OnCombatPanel();
+            UIhandler.OnCombatPanel();
         }
 
 
@@ -249,7 +250,7 @@ public class BattleHandler : MonoBehaviour
 
     IEnumerator DoAttack()
     {
-        Character currentCharacter = selectedCharacter.GetComponent<Character>();
+        Character currentCharacter = selectedCharacter;
 
         int attackerAttack = currentCharacter.GetAttack();
         int attackerDamage = currentCharacter.GetDamage();
@@ -259,7 +260,7 @@ public class BattleHandler : MonoBehaviour
         int roll = Random.Range(1, 20);
 
         //attack Animation
-        selectedCharacter.GetComponent<Character>().SetState(Character.State.attack);
+        selectedCharacter.SetState(Character.State.attack);
         yield return new WaitForSeconds(0.2f);
 
         if (selectedCharacter.name == "Cleric")
@@ -370,8 +371,9 @@ public class BattleHandler : MonoBehaviour
             SelectedSkill.IsUsed = true;
 
         if (SelectedSkill.Cost > 0)
-            selectedCharacter.GetComponent<Character>().ReduceCost(SelectedSkill.Cost);
+            selectedCharacter.ReduceCost(SelectedSkill.Cost);
 
+        UIhandler.UpdateCostAndAmount();
         yield return new WaitForSeconds(1.0f);
 
         //back to idle
@@ -407,6 +409,7 @@ public class BattleHandler : MonoBehaviour
 
         SelectedItem.Amount -= 1;
 
+        UIhandler.UpdateCostAndAmount();
         yield return new WaitForSeconds(1.0f);
 
         //back to idle
